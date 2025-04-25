@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Undang &amp; Dapat Uang</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to right, #6dd5fa, #2980b9);
+      color: white;
+      overflow: hidden;
+    }
+    .container {
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .reward-icon {
+      width: 150px;
+      height: 150px;
+      background: gold;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px yellow;
+    }
+    .popup, .overlay, .notif {
+      z-index: 100;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #333;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+    }
+    .notif {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      animation: fadein 2s ease-in-out;
+    }
+    .progress-bar {
+      width: 80%;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+      margin: 10px auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: lime;
+      transition: width 0.5s ease;
+    }
+    @keyframes fadein {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .random-popup {
+      position: fixed;
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      box-shadow: 0 0 10px #444;
+      animation: fadeUp 3s ease-in-out forwards;
+      z-index: 99;
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+
+    .money {
+      position: absolute;
+      width: 50px;
+      animation: float 5s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+      100% { transform: translateY(0px) rotate(-5deg); }
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: none;
+      background-color: #fff;
+      color: #2980b9;
+    }
+  </style>
+<style type="text/css" id="dcoder_stylesheet">.random-popup {
+  position: fixed;
+  background: rgba(255,255,255,0.95);
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: 0 0 10px #444;
+  animation: fadeUp 3s ease-in-out forwards;
+  z-index: 100;
+}
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}</style></head>
+<body>
+  <!-- Gambar uang mengambang -->
+  <img src="https://i.imgur.com/8bXKJyz.png" class="money" style="top:10%; left:10%;">
+  <img src="https://i.imgur.com/8bXKJyz.png" class="money" style="top:30%; left:70%;">
+  <img src="https://i.imgur.com/8bXKJyz.png" class="money" style="top:50%; left:40%;">
+  <img src="https://i.imgur.com/8bXKJyz.png" class="money" style="top:70%; left:20%;">
+
+  <div class="container">
+    <h1>Dapatkan Rp150.000</h1>
+    <p>Undang 10 teman &amp; bagikan link ke 5 grup</p>
+
+    <div class="reward-icon" onclick="showPopup()">Rp</div>
+
+    <button onclick="share()">Bagikan ke WhatsApp</button>
+    <p>Teman Diundang: <span id="invited">0</span>/10</p>
+    <p>Grup Dibagikan: <span id="shared">0</span>/5</p>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="hidePopup()"></div>
+  <div class="popup" id="popup">
+    <h2>Selamat!</h2>
+    <p>Kamu dapat Rp15.000 dari reward harian!</p>
+    <button onclick="hidePopup()">Tutup</button>
+  </div>
+
+  <div class="notif" id="notif" style="display:none;"></div>
+
+  <script>
+    let invited = 0;
+    let shared = 0;
+
+    function showPopup() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('popup').style.display = 'block';
+    }
+
+    function hidePopup() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('popup').style.display = 'none';
+    }
+
+    function share() {
+      if (shared < 5) {
+        shared++;
+        document.getElementById('shared').textContent = shared;
+
+        // Tambah progress bar tiap share
+        invited++;
+        document.getElementById('invited').textContent = invited;
+        const progress = document.getElementById('progress');
+        progress.style.width = `${(invited / 10) * 100}%`;
+
+        // Buka WhatsApp
+        const msg = encodeURIComponent("Yuk! Dapatkan uang cuma dengan undang teman: https://contoh.link");
+        window.location.href = `https://wa.me/?text=${msg}`;
+      }
+    }
+
+    const rewardNames = [
+      "hajixxx", "harumxxx", "cianxxx", "riyanxxx", "maduxxx", 
+      "ridoxxx", "sofixxx", "arifxxx", "maulidinaxxx", "ozixxx", "rafixxx"
+    ];
+
+    function showRandomRewardPopup() {
+      const name = rewardNames[Math.floor(Math.random() * rewardNames.length)];
+      const popup = document.createElement("div");
+      popup.className = "random-popup";
+      popup.innerText = `${name} telah mendapatkan 150.000,00`;
+
+      popup.style.top = Math.floor(Math.random() * 70 + 10) + "%";
+      popup.style.left = Math.floor(Math.random() * 60 + 20) + "%";
+
+      document.body.appendChild(popup);
+
+      setTimeout(() => popup.remove(), 3000);
+    }
+
+    setInterval(showRandomRewardPopup, 6000);
+  </script>
+
+<script>
+  // ...kode sebelumnya tetap...
+
+  const rewardNames = [
+    "hajixxx", "harumxxx", "cianxxx", "riyanxxx", "maduxxx", 
+    "ridoxxx", "sofixxx", "arifxxx", "maulidinaxxx", "ozixxx", "rafixxx"
+  ];
+
+  function showRandomRewardPopup() {
+    const name = rewardNames[Math.floor(Math.random() * rewardNames.length)];
+    const popup = document.createElement("div");
+    popup.className = "random-popup";
+    popup.innerText = `${name} telah mendapatkan 150.000,00`;
+
+    // posisi acak
+    popup.style.top = Math.floor(Math.random() * 70 + 10) + "%";
+    popup.style.left = Math.floor(Math.random() * 60 + 20) + "%";
+
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+      popup.remove();
+    }, 3000);
+  }
+
+  // Munculkan pop-up random setiap 6 detik
+  setInterval(showRandomRewardPopup, 6000);
+</script>
+https://i.imgur.com/8bXKJyz.png</body></html>
